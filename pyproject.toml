@@ -6,4 +6,5 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "fastmcp>=3.2.0",
+    "flask>=3.0.0",
 ]
