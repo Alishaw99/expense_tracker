@@ -101,8 +101,47 @@ def logout():
 
 
 @app.route("/profile")
+@login_required
 def profile():
-    return "Profile page — coming in Step 4"
+    db = get_db()
+    user = db.execute(
+        "SELECT id, name, email, created_at FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    summary = db.execute(
+        """
+        SELECT category,
+               COUNT(*) AS count,
+               SUM(amount) AS total
+        FROM expenses
+        WHERE user_id = ?
+        GROUP BY category
+        ORDER BY total DESC
+        """,
+        (session["user_id"],)
+    ).fetchall()
+
+    recent = db.execute(
+        """
+        SELECT date, category, amount, description
+        FROM expenses
+        WHERE user_id = ?
+        ORDER BY date DESC, id DESC
+        LIMIT 5
+        """,
+        (session["user_id"],)
+    ).fetchall()
+
+    grand_total = sum(row["total"] for row in summary)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        summary=summary,
+        recent=recent,
+        grand_total=grand_total,
+    )
 
 
 @app.route("/expenses/add")
