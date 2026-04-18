@@ -4,7 +4,8 @@
       "Bash(python:*)",
       "Bash(.venv/Scripts/python -c \"from app import app; print\\('OK'\\); [print\\(r\\) for r in app.url_map.iter_rules\\(\\)]\")",
       "Bash(.venv/Scripts/python.exe app.py)",
-      "Bash(.venv/Scripts/python.exe -c ':*)"
+      "Bash(.venv/Scripts/python.exe -c ':*)",
+      "Bash(uv run python -c ' *)"
     ]
   }
 }
