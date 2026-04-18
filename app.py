@@ -2,7 +2,7 @@ import functools
 import sqlite3
 from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
-from database.db import get_db, init_db, seed_db
+from database.db import get_db, init_db, seed_db, CATEGORIES
 
 app = Flask(__name__)
 app.secret_key = 'dev-secret-key-change-in-production'
@@ -141,6 +141,43 @@ def profile():
         summary=summary,
         recent=recent,
         grand_total=grand_total,
+    )
+
+
+@app.route("/expenses")
+@login_required
+def expense_list():
+    category = request.args.get("category", "").strip()
+    if category not in CATEGORIES:
+        category = ""
+
+    db = get_db()
+    if category:
+        expenses = db.execute(
+            """
+            SELECT id, date, category, amount, description
+            FROM expenses
+            WHERE user_id = ? AND category = ?
+            ORDER BY date DESC, id DESC
+            """,
+            (session["user_id"], category),
+        ).fetchall()
+    else:
+        expenses = db.execute(
+            """
+            SELECT id, date, category, amount, description
+            FROM expenses
+            WHERE user_id = ?
+            ORDER BY date DESC, id DESC
+            """,
+            (session["user_id"],),
+        ).fetchall()
+
+    return render_template(
+        "expenses.html",
+        expenses=expenses,
+        categories=CATEGORIES,
+        selected=category,
     )
 
 
